@@ -1,7 +1,7 @@
 # PHP-Replicated-Memory-Database-Server
 An easy to use PHP TCP JSON Memory Database server that has the ability to Replicate on multiple other servers in real time.
 
-# Pre-Requisis
+# Prerequisites
 1) The server must RUN on a Unix based system (RedHat, CentOS, Fedora, Ubuntu).
 2) PHP >= 5.3
 
