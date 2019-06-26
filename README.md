@@ -23,6 +23,8 @@ An easy to use PHP TCP JSON Memory Database server that has the ability to Repli
   2) Each documents are storing their values/arrays/objects in a unique id (key). 
 
 # Usage
+  First, connect to any of your servers by using TCP socket or Telnet for testing then send some JSON commands:
+  
   // Create Document
   
     {"action": "create", "document": "users"}
