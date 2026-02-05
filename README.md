@@ -1,5 +1,5 @@
 # PHP Replicated Memory Database Server
-Serveur TCP JSON en PHP qui garde des documents en memoire et replique les ecritures vers d'autres serveurs en temps reel.
+Serveur TCP JSON en PHP qui conserve des documents en memoire et replique les ecritures vers d'autres serveurs en temps reel.
 
 ## Prerequis
 - Systeme Unix/Linux (utilise /sbin/ifconfig et sockets TCP).
@@ -14,7 +14,7 @@ Serveur TCP JSON en PHP qui garde des documents en memoire et replique les ecrit
 php server.php
 ```
 
-4) Lancer la meme chose sur chaque serveur replica.
+4) Repeter l'operation sur chaque serveur replica.
 
 ## Configuration
 Dans [configs.php](configs.php):
@@ -166,7 +166,7 @@ Erreur:
 telnet 127.0.0.1 8888
 ```
 
-Puis envoyer une ligne JSON, exemple:
+Puis envoyer une ligne JSON, par exemple:
 
 ```json
 {"action": "list"}
