@@ -1,90 +1,227 @@
-# PHP-Replicated-Memory-Database-Server
-An easy to use PHP TCP JSON Memory Database server that has the ability to Replicate on multiple other servers in real time.
+# PHP Replicated Memory Database Server
+Serveur TCP JSON en PHP qui garde des documents en memoire et replique les ecritures vers d'autres serveurs en temps reel.
 
-# Prerequisites
-1) The server must RUN on a Unix based system (RedHat, CentOS, Fedora, Ubuntu).
-2) PHP >= 5.3
+## Prerequis
+- Systeme Unix/Linux (utilise /sbin/ifconfig et sockets TCP).
+- PHP >= 5.3.
 
-# FYI
-  The requests and responses are all in JSON format.
+## Demarrage rapide
+1) Copier les fichiers sur le serveur.
+2) Configurer [configs.php](configs.php).
+3) Lancer le serveur:
 
-# Installation
-1) Copy the files anywhere you want in your server.
-2) Edit the configs.php file
-  "ip": The ip to listen to, 0.0.0.0 by deault to listen on all interfaces.
-  "port": The port to listen to.
-  "replicas": The other servers IPs and Ports that the data will be replicated.
-3) Go to your files path and run the server.php in command line.
-  "php server.php"
-4) Do the same on the other servers if you need to use replication.
+```bash
+php server.php
+```
 
-# Description
-  1) A database is known as a document.
-  2) Each documents are storing their values/arrays/objects in a unique id (key). 
+4) Lancer la meme chose sur chaque serveur replica.
 
-# Usage
-  First, connect to any of your servers by using TCP socket or Telnet for testing then send some JSON commands:
-  
-  // Create Document
-  
-    {"action": "create", "document": "users"}
+## Configuration
+Dans [configs.php](configs.php):
+- `server_path`: chemin absolu du dossier qui contient [server.php](server.php).
+- `ip`: adresse d'ecoute (0.0.0.0 pour toutes les interfaces).
+- `port`: port d'ecoute.
+- `replicas`: liste des serveurs de replication (ip, port).
 
-  // Insert entries with automatic keys ("auto-increment" is true by default)
-  
-    {"action": "insert", "document": "users", "data": [{"name": "John"}, {"name": "Andrew"}], "auto-increment": true}
+## Concepts
+- Un document = une "table" en memoire.
+- Chaque document est un tableau associatif d'entrees indexees par une cle.
+- Les requetes et reponses sont des lignes JSON.
+- Envoyer la commande texte `quit` pour fermer la connexion.
 
-  // Insert entries with dynamic keys
-  
-    {"action": "insert", "document": "users", "data": {"John": {"Gender": "Male", "Job": "Developper"}, "Andrew": {"Gender": "Male", "Job": "Developper"}}, "auto-increment": false}
+## Protocole
+Chaque requete est un JSON avec au minimum `action`. Exemple:
 
-  // Get all entries of a document
-  
-    {"action": "get", "document": "users"}
+```json
+{"action": "list"}
+```
 
-  // Get document keys
-  
-    {"action": "getkeys", "document": "users"}
+Les reponses sont des JSON avec `status` = `success` ou `error`.
 
-  // Get entry by id (key)
-  
-    {"action": "get", "document": "users", "id": 0}
+## Actions
+### create
+Creer un document vide.
 
-  // Query entries
-  
-    {"action": "get", "document": "users", "query": {"Gender": "Male"}}
+```json
+{"action": "create", "document": "users"}
+```
 
-  // Update a document entry
-  
-    {"action": "update", "document": "users", "id": 0, "data": {"name": "Johnny"}}
+### insert
+Inserer des entrees. Par defaut, l'auto-increment est actif (ajout en fin de tableau).
 
-  // Update a whole document
-  
-    {"action": "update", "document": "users", "data": [{"name": "John"}, {"name": "Andrew"}]}
+```json
+{"action": "insert", "document": "users", "data": [{"name": "John"}, {"name": "Andrew"}]}
+```
 
-  // Delete single entry
-  
-    {"action": "delete", "document": "users", "id": 1000}
+Avec cles manuelles:
 
-  // Count document entries
-  
-    {"action": "count", "document": "users"}
+```json
+{"action": "insert", "document": "users", "data": {"John": {"Gender": "Male"}, "Andrew": {"Gender": "Male"}}, "auto-increment": false}
+```
 
-  // Count document entries with query
-  
-    {"action": "count", "document": "users", "query": {"Gender": "Male"}}
+Notes:
+- Si le document contient deja des entrees, les nouvelles doivent avoir les memes cles que la premiere entree.
 
-  // Drop/delete entire document
-  
-    {"action": "drop", "document": "users"}
+### get
+Recuperer un document complet, une entree par id, ou filtrer par query.
 
-  // Empty/truncate entire document
-  
-    {"action": "empty", "document": "users"}
+```json
+{"action": "get", "document": "users"}
+```
 
-  // List documents
-  
-    {"action": "list"}
+```json
+{"action": "get", "document": "users", "id": 0}
+```
 
-  // Get all data from all documents
-  
-    {"action": "getall"}
+```json
+{"action": "get", "document": "users", "query": {"Gender": "Male"}}
+```
+
+### getkeys
+Retourne les cles de la premiere entree du document.
+
+```json
+{"action": "getkeys", "document": "users"}
+```
+
+### update
+Mettre a jour une entree par id, ou remplacer tout le document.
+
+```json
+{"action": "update", "document": "users", "id": 0, "data": {"name": "Johnny"}}
+```
+
+```json
+{"action": "update", "document": "users", "data": [{"name": "John"}, {"name": "Andrew"}]}
+```
+
+### delete
+Supprimer une entree par id.
+
+```json
+{"action": "delete", "document": "users", "id": 0}
+```
+
+### count
+Compter les entrees, avec ou sans query.
+
+```json
+{"action": "count", "document": "users"}
+```
+
+```json
+{"action": "count", "document": "users", "query": {"Gender": "Male"}}
+```
+
+### empty
+Vider un document.
+
+```json
+{"action": "empty", "document": "users"}
+```
+
+### drop
+Supprimer un document.
+
+```json
+{"action": "drop", "document": "users"}
+```
+
+### list
+Lister les documents.
+
+```json
+{"action": "list"}
+```
+
+### getall
+Recuperer toutes les donnees en memoire.
+
+```json
+{"action": "getall"}
+```
+
+## Replication
+- La replication est automatique si `replicas` est configure.
+- Les requetes replicables acceptent le flag `replicate: false` pour eviter les boucles.
+- Au demarrage, le serveur tente un `getall` sur les replicas pour initialiser ses documents.
+
+## Exemples de reponses
+Succes:
+
+```json
+{"status": "success", "documents": ["users"]}
+```
+
+Erreur:
+
+```json
+{"status": "error", "message": "No document provided."}
+```
+
+## Exemples de clients
+### Telnet
+
+```bash
+telnet 127.0.0.1 8888
+```
+
+Puis envoyer une ligne JSON, exemple:
+
+```json
+{"action": "list"}
+```
+
+### Netcat
+
+```bash
+printf '{"action":"list"}\n' | nc 127.0.0.1 8888
+```
+
+### PHP (socket TCP)
+
+```php
+<?php
+$socket = fsockopen("127.0.0.1", 8888, $errno, $errstr, 2);
+if (!$socket) {
+	die("Connect error: $errstr ($errno)\n");
+}
+$payload = json_encode(array("action" => "list")) . "\n";
+fwrite($socket, $payload);
+echo fgets($socket);
+fclose($socket);
+?>
+```
+
+### Python
+
+```python
+import socket
+import json
+
+sock = socket.create_connection(("127.0.0.1", 8888), timeout=2)
+payload = json.dumps({"action": "list"}) + "\n"
+sock.sendall(payload.encode("utf-8"))
+print(sock.recv(4096).decode("utf-8"))
+sock.close()
+```
+
+## Limites et notes techniques
+- Memoire uniquement: aucune persistence disque.
+- `getkeys` suppose qu'il existe au moins une entree dans le document.
+- `update` sans `id` remplace le document complet.
+- Les schemas ne sont pas formalises: la validation se base sur la premiere entree du document.
+- Le serveur est mono-process et utilise des sockets non bloquants.
+
+## Securite et bonnes pratiques
+- Ne pas exposer publiquement le port; utiliser un pare-feu/VPN.
+- Ajouter un proxy TCP ou un tunnel (SSH/stunnel) si besoin de chiffrement.
+- Mettre les replicas sur un reseau prive pour eviter les boucles ou injections.
+- Monitorer la memoire et redemarrer le service si besoin.
+
+## Troubleshooting
+- Le serveur ne demarre pas: verifier `server_path` et que PHP a l'extension sockets activee.
+- Aucun replica ne se connecte: verifier `replicas` (ip/port) et la connectivite reseau.
+- `getkeys` retourne une erreur: inserer au moins une entree dans le document.
+- Erreur JSON: s'assurer d'envoyer une ligne JSON complete terminee par un saut de ligne.
+- Donnees non replicables: verifier que `replicate` n'est pas force a `false`.
