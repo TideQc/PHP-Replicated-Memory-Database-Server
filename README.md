@@ -212,25 +212,38 @@ Mode JSON:
 php test_client.php --json
 ```
 
-Exemple de sortie:
+Exemple de sortie JSON:
 
-```text
-Test Report
-===========
-Latency (ms): 1.23
-Replicas configured: 2
-Replicas reachable: 1
-Replica 1.2.3.4:8888: OK
-Replica 1.2.3.5:8888: FAIL - Connection refused (111)
-Latency by action (ms):
-- list: avg 0.90, min 0.70, max 1.10
-- getall: avg 1.40, min 1.20, max 1.70
-01) PASS - list returns response
-02) PASS - create document
-...
------------
-Passed: 15
-Failed: 0
+```json
+{
+	"latency_ms": 1.23,
+	"latency_by_action": {
+		"list": {
+			"avg": 0.9,
+			"min": 0.7,
+			"max": 1.1,
+			"samples": [0.9, 0.8, 1.1]
+		},
+		"getall": {
+			"avg": 1.4,
+			"min": 1.2,
+			"max": 1.7,
+			"samples": [1.2, 1.4, 1.7]
+		}
+	},
+	"replicas_configured": 2,
+	"replicas_reachable": 1,
+	"replica_details": [
+		{"ip": "1.2.3.4", "port": 8888, "ok": true, "error": ""},
+		{"ip": "1.2.3.5", "port": 8888, "ok": false, "error": "Connection refused (111)"}
+	],
+	"results": [
+		{"pass": true, "message": "list returns response"},
+		{"pass": true, "message": "create document"}
+	],
+	"passed": 15,
+	"failed": 0
+}
 ```
 
 ### Python
