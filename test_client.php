@@ -5,6 +5,7 @@ $port = 8888;
 $timeout = 2;
 $configs = include("configs.php");
 $latency_iterations = 3;
+$json_output = isset($argv) && in_array("--json", $argv, true);
 
 function connect_to_server($host, $port, $timeout) {
     $socket = fsockopen($host, $port, $errno, $errstr, $timeout);
@@ -279,11 +280,8 @@ fclose($socket);
 // Report
 $pass = 0;
 $fail = 0;
-echo "Test Report\n";
-echo "===========\n";
-echo "Latency (ms): " . number_format($metrics["latency_ms"], 2) . "\n";
+$latency_by_action = array();
 if (isset($metrics["actions"]) && is_array($metrics["actions"])) {
-    echo "Latency by action (ms):\n";
     foreach ($metrics["actions"] as $action => $samples) {
         if (!is_array($samples) || count($samples) == 0) {
             continue;
@@ -291,29 +289,61 @@ if (isset($metrics["actions"]) && is_array($metrics["actions"])) {
         $min = min($samples);
         $max = max($samples);
         $avg = array_sum($samples) / count($samples);
-        echo "- " . $action . ": avg " . number_format($avg, 2) . ", min " . number_format($min, 2) . ", max " . number_format($max, 2) . "\n";
+        $latency_by_action[$action] = array(
+            "avg" => $avg,
+            "min" => $min,
+            "max" => $max,
+            "samples" => $samples
+        );
     }
 }
-echo "Replicas configured: " . $metrics["replicas_configured"] . "\n";
-echo "Replicas reachable: " . $metrics["replicas_reachable"] . "\n";
-if (isset($replica_report["details"]) && count($replica_report["details"]) > 0) {
-    foreach ($replica_report["details"] as $replica) {
-        $status = $replica["ok"] ? "OK" : "FAIL";
-        $target = $replica["ip"] . ":" . $replica["port"];
-        $err = $replica["ok"] ? "" : " - " . $replica["error"];
-        echo "Replica " . $target . ": " . $status . $err . "\n";
-    }
-}
+
 foreach ($results as $index => $result) {
-    $label = $result["pass"] ? "PASS" : "FAIL";
     if ($result["pass"]) {
         $pass++;
     } else {
         $fail++;
     }
-    echo sprintf("%02d) %s - %s\n", $index + 1, $label, $result["message"]);
 }
-echo "-----------\n";
-echo "Passed: $pass\n";
-echo "Failed: $fail\n";
+
+if ($json_output) {
+    $report = array(
+        "latency_ms" => $metrics["latency_ms"],
+        "latency_by_action" => $latency_by_action,
+        "replicas_configured" => $metrics["replicas_configured"],
+        "replicas_reachable" => $metrics["replicas_reachable"],
+        "replica_details" => $replica_report["details"],
+        "results" => $results,
+        "passed" => $pass,
+        "failed" => $fail
+    );
+    echo json_encode($report, JSON_PRETTY_PRINT) . "\n";
+} else {
+    echo "Test Report\n";
+    echo "===========\n";
+    echo "Latency (ms): " . number_format($metrics["latency_ms"], 2) . "\n";
+    if (count($latency_by_action) > 0) {
+        echo "Latency by action (ms):\n";
+        foreach ($latency_by_action as $action => $stats) {
+            echo "- " . $action . ": avg " . number_format($stats["avg"], 2) . ", min " . number_format($stats["min"], 2) . ", max " . number_format($stats["max"], 2) . "\n";
+        }
+    }
+    echo "Replicas configured: " . $metrics["replicas_configured"] . "\n";
+    echo "Replicas reachable: " . $metrics["replicas_reachable"] . "\n";
+    if (isset($replica_report["details"]) && count($replica_report["details"]) > 0) {
+        foreach ($replica_report["details"] as $replica) {
+            $status = $replica["ok"] ? "OK" : "FAIL";
+            $target = $replica["ip"] . ":" . $replica["port"];
+            $err = $replica["ok"] ? "" : " - " . $replica["error"];
+            echo "Replica " . $target . ": " . $status . $err . "\n";
+        }
+    }
+    foreach ($results as $index => $result) {
+        $label = $result["pass"] ? "PASS" : "FAIL";
+        echo sprintf("%02d) %s - %s\n", $index + 1, $label, $result["message"]);
+    }
+    echo "-----------\n";
+    echo "Passed: $pass\n";
+    echo "Failed: $fail\n";
+}
 ?>

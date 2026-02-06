@@ -206,6 +206,12 @@ fclose($socket);
 php test_client.php
 ```
 
+Mode JSON:
+
+```bash
+php test_client.php --json
+```
+
 Exemple de sortie:
 
 ```text
