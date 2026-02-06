@@ -246,6 +246,27 @@ Exemple de sortie JSON:
 }
 ```
 
+Exemple de sortie texte:
+
+```text
+Test Report
+===========
+Latency (ms): 1.23
+Replicas configured: 2
+Replicas reachable: 1
+Replica 1.2.3.4:8888: OK
+Replica 1.2.3.5:8888: FAIL - Connection refused (111)
+Latency by action (ms):
+- list: avg 0.90, min 0.70, max 1.10
+- getall: avg 1.40, min 1.20, max 1.70
+01) PASS - list returns response
+02) PASS - create document
+...
+-----------
+Passed: 15
+Failed: 0
+```
+
 ### Python
 
 ```python
