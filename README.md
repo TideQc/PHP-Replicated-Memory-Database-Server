@@ -15,6 +15,12 @@ Serveur TCP JSON en PHP qui conserve des documents en mémoire et réplique les 
 php server.php
 ```
 
+V2 (version optimisee):
+
+```bash
+php server_v2.php
+```
+
 4) Répéter l'opération sur chaque serveur réplique.
 
 ## Configuration
@@ -192,6 +198,12 @@ fwrite($socket, $payload);
 echo fgets($socket);
 fclose($socket);
 ?>
+```
+
+### Test client (rapport)
+
+```bash
+php test_client.php
 ```
 
 ### Python
