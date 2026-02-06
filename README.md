@@ -4,6 +4,7 @@ Serveur TCP JSON en PHP qui conserve des documents en mémoire et réplique les 
 ## Prérequis
 - Système Unix/Linux (utilise /sbin/ifconfig et sockets TCP).
 - PHP >= 5.3.
+- Extension sockets activée (extension=sockets dans php.ini).
 
 ## Demarrage rapide
 1) Copier les fichiers sur le serveur.

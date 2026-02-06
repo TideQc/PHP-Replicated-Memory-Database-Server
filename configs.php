@@ -1,5 +1,4 @@
 <?php
-
 	/*
 	 * PHP Memory Database Server Configurations
 	*/	
@@ -16,6 +15,7 @@
 		 * ip and port in arrays
 		*/
 		"replicas" => array(
+			/*
 			array(
 				"ip" => "1.2.3.4",
 				"port" => 8888
@@ -24,6 +24,7 @@
 				"ip" => "1.2.3.5",
 				"port" => 8888
 			)
+			*/
 		)
 	);
 ?>
