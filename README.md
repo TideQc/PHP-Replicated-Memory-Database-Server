@@ -1,8 +1,8 @@
 # PHP Replicated Memory Database Server
-Serveur TCP JSON en PHP qui conserve des documents en memoire et replique les ecritures vers d'autres serveurs en temps reel.
+Serveur TCP JSON en PHP qui conserve des documents en mémoire et réplique les écritures vers d'autres serveurs en temps réel.
 
-## Prerequis
-- Systeme Unix/Linux (utilise /sbin/ifconfig et sockets TCP).
+## Prérequis
+- Système Unix/Linux (utilise /sbin/ifconfig et sockets TCP).
 - PHP >= 5.3.
 
 ## Demarrage rapide
@@ -14,7 +14,7 @@ Serveur TCP JSON en PHP qui conserve des documents en memoire et replique les ec
 php server.php
 ```
 
-4) Repeter l'operation sur chaque serveur replica.
+4) Répéter l'opération sur chaque serveur réplique.
 
 ## Configuration
 Dans [configs.php](configs.php):
@@ -24,9 +24,9 @@ Dans [configs.php](configs.php):
 - `replicas`: liste des serveurs de replication (ip, port).
 
 ## Concepts
-- Un document = une "table" en memoire.
-- Chaque document est un tableau associatif d'entrees indexees par une cle.
-- Les requetes et reponses sont des lignes JSON.
+- Un document = une "table" en mémoire.
+- Chaque document est un tableau associatif d'entrées indexées par une clé.
+- Les requêtes et réponses sont des lignes JSON.
 - Envoyer la commande texte `quit` pour fermer la connexion.
 
 ## Protocole
@@ -36,34 +36,34 @@ Chaque requete est un JSON avec au minimum `action`. Exemple:
 {"action": "list"}
 ```
 
-Les reponses sont des JSON avec `status` = `success` ou `error`.
+Les réponses sont des JSON avec `status` = `success` ou `error`.
 
 ## Actions
 ### create
-Creer un document vide.
+Créer un document vide.
 
 ```json
 {"action": "create", "document": "users"}
 ```
 
 ### insert
-Inserer des entrees. Par defaut, l'auto-increment est actif (ajout en fin de tableau).
+Insérer des entrées. Par défaut, l'auto-increment est actif (ajout en fin de tableau).
 
 ```json
 {"action": "insert", "document": "users", "data": [{"name": "John"}, {"name": "Andrew"}]}
 ```
 
-Avec cles manuelles:
+Avec clés manuelles:
 
 ```json
 {"action": "insert", "document": "users", "data": {"John": {"Gender": "Male"}, "Andrew": {"Gender": "Male"}}, "auto-increment": false}
 ```
 
 Notes:
-- Si le document contient deja des entrees, les nouvelles doivent avoir les memes cles que la premiere entree.
+- Si le document contient déjà des entrées, les nouvelles doivent avoir les mêmes clés que la première entrée.
 
 ### get
-Recuperer un document complet, une entree par id, ou filtrer par query.
+Récupérer un document complet, une entrée par id, ou filtrer par query.
 
 ```json
 {"action": "get", "document": "users"}
@@ -78,14 +78,14 @@ Recuperer un document complet, une entree par id, ou filtrer par query.
 ```
 
 ### getkeys
-Retourne les cles de la premiere entree du document.
+Retourne les clés de la première entrée du document.
 
 ```json
 {"action": "getkeys", "document": "users"}
 ```
 
 ### update
-Mettre a jour une entree par id, ou remplacer tout le document.
+Mettre à jour une entrée par id, ou remplacer tout le document.
 
 ```json
 {"action": "update", "document": "users", "id": 0, "data": {"name": "Johnny"}}
@@ -96,14 +96,14 @@ Mettre a jour une entree par id, ou remplacer tout le document.
 ```
 
 ### delete
-Supprimer une entree par id.
+Supprimer une entrée par id.
 
 ```json
 {"action": "delete", "document": "users", "id": 0}
 ```
 
 ### count
-Compter les entrees, avec ou sans query.
+Compter les entrées, avec ou sans query.
 
 ```json
 {"action": "count", "document": "users"}
@@ -135,19 +135,19 @@ Lister les documents.
 ```
 
 ### getall
-Recuperer toutes les donnees en memoire.
+Récupérer toutes les données en mémoire.
 
 ```json
 {"action": "getall"}
 ```
 
-## Replication
-- La replication est automatique si `replicas` est configure.
-- Les requetes replicables acceptent le flag `replicate: false` pour eviter les boucles.
-- Au demarrage, le serveur tente un `getall` sur les replicas pour initialiser ses documents.
+## Réplication
+- La réplication est automatique si `replicas` est configuré.
+- Les requêtes réplicables acceptent le flag `replicate: false` pour éviter les boucles.
+- Au démarrage, le serveur tente un `getall` sur les répliques pour initialiser ses documents.
 
 ## Exemples de reponses
-Succes:
+Succès:
 
 ```json
 {"status": "success", "documents": ["users"]}
@@ -207,21 +207,21 @@ sock.close()
 ```
 
 ## Limites et notes techniques
-- Memoire uniquement: aucune persistence disque.
-- `getkeys` suppose qu'il existe au moins une entree dans le document.
+- Mémoire uniquement: aucune persistance disque.
+- `getkeys` suppose qu'il existe au moins une entrée dans le document.
 - `update` sans `id` remplace le document complet.
-- Les schemas ne sont pas formalises: la validation se base sur la premiere entree du document.
+- Les schémas ne sont pas formalisés: la validation se base sur la première entrée du document.
 - Le serveur est mono-process et utilise des sockets non bloquants.
 
-## Securite et bonnes pratiques
+## Sécurité et bonnes pratiques
 - Ne pas exposer publiquement le port; utiliser un pare-feu/VPN.
 - Ajouter un proxy TCP ou un tunnel (SSH/stunnel) si besoin de chiffrement.
-- Mettre les replicas sur un reseau prive pour eviter les boucles ou injections.
-- Monitorer la memoire et redemarrer le service si besoin.
+- Mettre les répliques sur un réseau privé pour éviter les boucles ou injections.
+- Monitorer la mémoire et redémarrer le service si besoin.
 
 ## Troubleshooting
-- Le serveur ne demarre pas: verifier `server_path` et que PHP a l'extension sockets activee.
-- Aucun replica ne se connecte: verifier `replicas` (ip/port) et la connectivite reseau.
-- `getkeys` retourne une erreur: inserer au moins une entree dans le document.
-- Erreur JSON: s'assurer d'envoyer une ligne JSON complete terminee par un saut de ligne.
-- Donnees non replicables: verifier que `replicate` n'est pas force a `false`.
+- Le serveur ne démarre pas: vérifier `server_path` et que PHP a l'extension sockets activée.
+- Aucune réplique ne se connecte: vérifier `replicas` (ip/port) et la connectivité réseau.
+- `getkeys` retourne une erreur: insérer au moins une entrée dans le document.
+- Erreur JSON: s'assurer d'envoyer une ligne JSON complète terminée par un saut de ligne.
+- Données non réplicables: vérifier que `replicate` n'est pas forcé à `false`.
