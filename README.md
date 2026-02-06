@@ -225,3 +225,6 @@ sock.close()
 - `getkeys` retourne une erreur: insérer au moins une entrée dans le document.
 - Erreur JSON: s'assurer d'envoyer une ligne JSON complète terminée par un saut de ligne.
 - Données non réplicables: vérifier que `replicate` n'est pas forcé à `false`.
+
+## Crédits
+Fait avec amour par Michael Tétreault.
